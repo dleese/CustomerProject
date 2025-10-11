@@ -13,4 +13,4 @@ configure_file(EmpireNotes.md.in EmpireNotes.md)
 # In a CMakeLists.txt file
 include(cmake/GitVersion.cmake)
 
-# Includes the file MyCustomFunctions.cmake
+get_version_from_git()

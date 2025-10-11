@@ -3,9 +3,9 @@
 ## General Information
 | Document Information |
 | ------------- |
-| Version:@LPProject_VERSION_MAJOR@.@LPProject_VERSION_MINOR@ @MY_VARIABLE@ |
-| Project:@LP_CUSTOMER_COMPANY_NAME@|
-| Created:@LP_CURRENT_TIME_UTC@ UTC|
+| Version: @LPProject_VERSION_MAJOR@.@LPProject_VERSION_MINOR@ @MY_VARIABLE@ |
+| Project: @LP_CUSTOMER_COMPANY_NAME@|
+| Created: @LP_CURRENT_TIME_UTC@ UTC|
 
 
 ## Contact Information
