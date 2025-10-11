@@ -1,3 +1,5 @@
 #Exclude the bin ( build ) folder to be tracked
 build/
 
+# Exclude Finder specific files
+.DS_Store
