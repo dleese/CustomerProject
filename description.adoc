@@ -1,0 +1,76 @@
+= Project
+Author <dirk.leese@dextradata.com>
+version, --: remark
+:attributes:
+
+== Contacts
+. Contact persons
+[%autowidth%header,cols="1,1,1"]
+|===
+| E-Mail | Name | phone
+
+| dirk.leese@dextradata.de
+| Dirk Leese
+| +49 172 2866667
+
+| larissa.ihnen@dextradata.de
+| Larissa Ihnen 
+| +49 172 xxxxxxxxx
+|===
+
+== Project Setup Description
+This documentation describes all components of the Logipad Infrastructure setup and how those components are related to each other.
+
+
+=== Infrastructure
+The Infrastructure consists the following components:
+
+* Management User Interface ( *MUI* )
+* Flight- and Briefing-Manager
+* iOS-Client ( iPad Application )
+* Web-Client 
+
+=== MUI
+The Management User Interface, is the central point to administrate the Logipad System. This interface is handled and configured by EFB Administrators.
+
+
+.Administrative Interface URL 
+[%autowidth%header,cols="1,1,1"]
+|===
+| URL  | Login Name | Password
+
+| https://mui.*_client_name_*.prod.logipad.aero  
+| admin user 
+| password
+|===
+
+=== Flight- and Briefing-Manager 
+The Flight- and Briefing-Manager is the central Point to administrate and Manage Breiefing/EFF content.
+
+.Flight- and Briefing-Manager URL
+[%autowidth%header,cols="1,1,1"]
+|===
+| URL  | Login Name | Password
+
+| https://flightmanager.*_client_name_*.prod.logipad.aero  
+| admin user
+| password 
+|===
+
+=== WebClient
+The Web-Client is the working device for Pilots, Cabin Crew and Maintenance members for instance to display data and content assigned to Users.
+
+.Web-Client URL
+[%autowidth%header,cols="1,1,1"]
+|===
+| URL  | Login Name | Password
+
+| https://webclient..*client_name_*.prod.logipad.aero  
+| user 
+| password
+|===
+
+= iOS Clients
+The iOS-Client is the working device for Pilots, Cabin Crew and Maintenance members for instance to display data and content assigned to Users. The configuration for the iOS Application has already been configured.
+
+

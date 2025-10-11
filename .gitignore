@@ -1,0 +1,3 @@
+#Exclude the bin ( build ) folder to be tracked
+build/
+
