@@ -1,10 +1,11 @@
-# @LP_CUSTOMER_COMPANY_NAME@
+# Logipad Project: @LP_CUSTOMER_COMPANY_NAME@
 
 ## General Information
 | Document Information |
 | ------------- |
 | Version: @FULL_VERSION@ |
-| Project: @LP_CUSTOMERTOMER_COMPANY_NAME@|
+| Project Version: @PROJECT_VERSION@|
+| Project Name: @LP_CUSTOMER_COMPANY_NAME@|
 | Created: @LP_CURRENT_TIME_UTC@ UTC|
 
 

@@ -7,10 +7,9 @@ get_version_from_git()
 
 set(LP_CUSTOMER_COMPANY_NAME "Empire Aviation Group")
 set(LP_CUSTOMER_DOMAIN "empireaviationgroup")
-set(LP_CUSTOMER_COMPANY_NAME} "Empire Aviation")
+set(LP_CUSTOMER_COMPANY_NAME "Empire Aviation")
 
 add_subdirectory("doc")
-# configure_file(EmpireNotes.md.in EmpireNotes.md)
 
 
 

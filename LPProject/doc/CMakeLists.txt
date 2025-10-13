@@ -1,3 +1,5 @@
 
+# Use Project Template File to Create
+#
+configure_file(LPProject.md.in LPProject.md)
 
-configure_file(EmpireNotes.md.in EmpireNotes.md)
