@@ -3,8 +3,8 @@
 ## General Information
 | Document Information |
 | ------------- |
-| Version: @FULL_VERSION@ |
-| Project Version: @PROJECT_VERSION@|
+| Version: @LP_FULL_VERSION@|
+| Project Version: @LP_PROJECT_VERSION@|
 | Project Name: @LP_CUSTOMER_COMPANY_NAME@|
 | Created: @LP_CURRENT_TIME_UTC@ UTC|
 
