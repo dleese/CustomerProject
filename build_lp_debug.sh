@@ -1,12 +1,19 @@
 #!/bin/bash
 #
+# (c) Dirk Leese 26.10.2025
+#
+# assume we are in the current Project directory which is 'LPProject'
+#
 
-echo "-- cd to build Directory"
-cd ./build
-
-echo "-- Clean Directory"
-rm -fr *
-
-cmake ../LPProject
-# cmake -S ../LPProject -DCMAKE_BUILD_TYPE=Debug
-cmake --build .
+# does build/ directory exits
+# YES => delete directory
+#
+if [ -d ./build ]; then
+  echo "Found build directory..."
+  echo "Remove build Directory!"
+  rm -fr ./build/
+fi
+mkdir build && cd build
+cmake ../LPProject -DCMAKE_BUILD_TYPE=Debug
+cmake --build . --target LPProject
+#cmake --build . --target doxygen_docs

@@ -1,5 +1,5 @@
 #Exclude the bin ( build ) folder to be tracked
 build/
-
+./vscode
 # Exclude Finder specific files
 .DS_Store
