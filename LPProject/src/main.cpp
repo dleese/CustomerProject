@@ -1,22 +1,21 @@
 /**
- * @file
+ * @file main.cpp
+ * @brief Entry point of the LPProject application
+ * @details This file contains the main entry point and the protected_main function
+ *          that executes the application logic. It demonstrates usage of both
+ *          LPKeyCloakClient and LPLogipadClient classes for Keycloak authentication
+ *          and user management operations.
+ * @author Dirk Leese
+ * @date 2025
  *
- * @brief Entry point of the application.
+ * @section Usage
+ * The application performs the following operations:
+ * 1. Authenticates with Keycloak using logipad::auth::KeycloakClient
+ * 2. Creates a test user in Keycloak
+ * 3. Authenticates with Keycloak using logipad::client::LogipadClient
+ * 4. Retrieves all users from the Logipad identity service
  *
- * This function initializes all subsystems, processes command line arguments,
- * and executes the main application logic.
- *
- * @return Exit status code, 0 for success or non-zero for error.
- *
- * @details
- * protected_main is called to execute the main logic.
- * It catches any exceptions and returns the appropriate exit status.
- *
- * Key Points
- * - Pass the command line parameters `argc` and `argv` from `main` into the protected function.
- * - Raise exceptions for error conditions (e.g., missing arguments).
- * - Catch exceptions centrally in `main()` for logging and return code handling.
- * - Keep `protected_main` focused on actual program logic.
+ * @note This is a demonstration/example application showcasing the client libraries.
  */
 
 #include <iostream>
@@ -27,11 +26,28 @@
 #include <httplib.h>
 #include <nlohmann/json.hpp> // For JSON parsing
 
+// Using declarations for cleaner code
+using logipad::auth::KeycloakClient;
+using logipad::client::LogipadClient;
+using logipad::core::HelperObject;
+
+/**
+ * @brief Protected main function that executes application logic
+ * @param argc Number of command-line arguments
+ * @param argv Array of command-line argument strings
+ * @return Exit status code: 0 for success, non-zero for error
+ * @details This function contains the main application logic separated from
+ *          exception handling. It demonstrates:
+ *          - Keycloak authentication using logipad::auth::KeycloakClient
+ *          - User creation in Keycloak
+ *          - Logipad client authentication using logipad::client::LogipadClient
+ *          - User retrieval from Logipad identity service
+ * @note Command-line arguments are currently unused but reserved for future functionality.
+ */
 int protected_main(int argc, char *argv[])
 {
-
-    (void)argc; // for now, we are not using the arguments, so we are not processing them.
-    (void)argv; // for now, we are not using the arguments, so we are not processing them.
+    (void)argc; // Reserved for future command-line argument processing
+    (void)argv; // Reserved for future command-line argument processing
 
     // Example for Argument Processing
     // For now, we are not using any arguments, so we are not processing them.
@@ -43,7 +59,7 @@ int protected_main(int argc, char *argv[])
     // Define the realm
     const std::string &realm = "Logipad";
 
-    LPKeyCloakClient lpkcclient(
+    KeycloakClient lpkcclient(
         "keycloak-cloud.logipad.net",
         443,
         "master",
@@ -57,7 +73,7 @@ int protected_main(int argc, char *argv[])
     {
 
         std::cout << "Access Token: " << lpkcclient.getAccessToken() << std::endl;
-        if (lpkcclient.createUser(LPKeyCloakClient::UserInfo("aaaaa", "testuser@test.com", "Test", "User", "testpassword"), realm))
+        if (lpkcclient.createUser(KeycloakClient::UserInfo("aaaaa", "testuser@test.com", "Test", "User", "testpassword"), realm))
         {
             std::cout << "User created successfully" << std::endl;
         }
@@ -72,7 +88,7 @@ int protected_main(int argc, char *argv[])
     }
 
     // Create the Logipad client
-    LPLogipadClient client(
+    LogipadClient client(
         "keycloak-cloud.logipad.net",
         443,
         "Logipad",
@@ -84,8 +100,8 @@ int protected_main(int argc, char *argv[])
     if (client.authenticate())
     {
         // Get all users
-        LPLogipadClient::Users users;
-        if (client.getAllUsers(users,"identity.demo.prod.logipad.net", client.m_port))
+        LogipadClient::Users users;
+        if (client.getAllUsers(users, "identity.demo.prod.logipad.net", client.m_port))
         {
             std::cout << "Retrieved " << users.users.size() << " users" << std::endl;
             for (const auto &user : users.users)
@@ -94,7 +110,8 @@ int protected_main(int argc, char *argv[])
                 if (user.name.has_value())
                 {
                     std::cout << user.name.value() << " ";
-                    if (user.email.has_value()){
+                    if (user.email.has_value())
+                    {
                         std::cout << " (" << user.email.value() << ")";
                     }
                 }
@@ -110,12 +127,18 @@ int protected_main(int argc, char *argv[])
 }
 
 /**
- * @brief Main function
- * @param argc The number of arguments
- * @param argv The arguments
- * @details The main function catches any exceptions and returns the appropriate exit status.
- * protected_main is called to execute the main logic.
- * @return The exit status
+ * @brief Main entry point of the application
+ * @param argc The number of command-line arguments
+ * @param argv Array of command-line argument strings
+ * @return Exit status code:
+ *         - 0: Successful execution
+ *         - 1: Standard exception caught
+ *         - 2: Unknown exception caught
+ * @details The main function provides centralized exception handling. It catches
+ *          all exceptions, logs error messages, and returns appropriate exit codes.
+ *          The actual application logic is executed in protected_main().
+ * @note This separation allows for consistent error handling and logging across
+ *       the entire application.
  */
 int main(int argc, char *argv[])
 {

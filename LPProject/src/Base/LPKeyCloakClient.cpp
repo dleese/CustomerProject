@@ -32,226 +32,251 @@
 #include <iostream>
 #include <stdexcept>
 
-// UserInfo::toJson() implementation
-nlohmann::json LPKeyCloakClient::UserInfo::toJson() const
+namespace logipad
 {
-    nlohmann::json json;
-    json["username"] = username;
-    json["email"] = email;
-    json["firstName"] = firstName;
-    json["lastName"] = lastName;
-    json["enabled"] = enabled;
-    json["emailVerified"] = emailVerified;
-
-    if (!password.empty())
+    namespace auth
     {
-        json["credentials"] = nlohmann::json::array();
-        nlohmann::json cred;
-        cred["type"] = "password";
-        cred["value"] = "logipad";
-        cred["temporary"] = true;
-        json["credentials"].push_back(cred);
-    }
 
-    return json;
-}
-
-LPKeyCloakClient::LPKeyCloakClient(
-    const std::string &host,
-    int port,
-    const std::string &realm,
-    const std::string &clientId,
-    const std::string &username,
-    const std::string &password) : m_host(host),
-                                   m_port(port),
-                                   m_realm(realm),
-                                   m_clientId(clientId),
-                                   m_username(username),
-                                   m_password(password),
-                                   m_client(std::make_unique<httplib::SSLClient>(host, port))
-{
-    // Set connection timeout (10 seconds)
-    m_client->set_connection_timeout(10, 0);
-    m_client->set_read_timeout(10, 0);
-}
-
-// Destructor
-LPKeyCloakClient::~LPKeyCloakClient() = default;
-
-// Authenticate method
-bool LPKeyCloakClient::authenticate()
-{
-    m_lastError.clear();
-    m_accessToken.clear();
-
-    if (m_username.empty() || m_password.empty())
-    {
-        m_lastError = "Username or password not set";
-        return false;
-    }
-
-    std::string tokenUrl = "/realms/" + m_realm + "/protocol/openid-connect/token";
-
-    // Prepare form data for password grant
-    httplib::Params params;
-    params.emplace("client_id", m_clientId);
-    params.emplace("grant_type", "password");
-    params.emplace("username", m_username);
-    params.emplace("password", m_password);
-
-    // Make the POST request
-    auto res = m_client->Post(tokenUrl.c_str(), params);
-
-    if (res && res->status == 200)
-    {
-        try
+        /**
+         * @brief Convert UserInfo to JSON format for Keycloak API
+         * @return JSON object containing user information
+         * @details Serializes the UserInfo structure to a JSON format compatible with
+         *          Keycloak Admin REST API. The password is included in a credentials array
+         *          with type "password" and marked as temporary (user must change on first login).
+         */
+        nlohmann::json KeycloakClient::UserInfo::toJson() const
         {
-            auto json = nlohmann::json::parse(res->body);
-            if (json.contains("access_token"))
+            nlohmann::json json;
+            json["username"] = username;
+            json["email"] = email;
+            json["firstName"] = firstName;
+            json["lastName"] = lastName;
+            json["enabled"] = enabled;
+            json["emailVerified"] = emailVerified;
+
+            if (!password.empty())
             {
-                m_accessToken = json["access_token"].get<std::string>();
-                return true;
+                json["credentials"] = nlohmann::json::array();
+                nlohmann::json cred;
+                cred["type"] = "password";
+                cred["value"] = "logipad";
+                cred["temporary"] = true;
+                json["credentials"].push_back(cred);
             }
-            else
+
+            return json;
+        }
+
+        /**
+         * @brief Constructor implementation
+         * @details Initializes all member variables and creates the SSL client connection
+         *          with 10-second connection and read timeouts.
+         */
+        KeycloakClient::KeycloakClient(
+            const std::string &host,
+            int port,
+            const std::string &realm,
+            const std::string &clientId,
+            const std::string &username,
+            const std::string &password) : m_host(host),
+                                           m_port(port),
+                                           m_realm(realm),
+                                           m_clientId(clientId),
+                                           m_username(username),
+                                           m_password(password),
+                                           m_client(std::make_unique<httplib::SSLClient>(host, port))
+        {
+            // Set connection timeout (10 seconds)
+            m_client->set_connection_timeout(10, 0);
+            m_client->set_read_timeout(10, 0);
+        }
+
+        /**
+         * @brief Destructor implementation
+         * @details Automatically cleans up the SSL client and all member variables.
+         */
+        KeycloakClient::~KeycloakClient() = default;
+
+        /**
+         * @brief Authenticate with Keycloak server
+         * @details Performs password grant OAuth2 authentication and stores the access token.
+         */
+        bool KeycloakClient::authenticate()
+        {
+            m_lastError.clear();
+            m_accessToken.clear();
+
+            if (m_username.empty() || m_password.empty())
             {
-                m_lastError = "Access token not found in response";
+                m_lastError = "Username or password not set";
                 return false;
             }
-        }
-        catch (const nlohmann::json::exception &e)
-        {
-            m_lastError = "Failed to parse JSON response: " + std::string(e.what());
-            return false;
-        }
-    }
-    else
-    {
-        if (res)
-        {
-            m_lastError = "Authentication failed with status: " + std::to_string(res->status);
-            if (!res->body.empty())
-            {
-                m_lastError += " - " + res->body;
-            }
-        }
-        else
-        {
-            m_lastError = "Authentication request failed";
-        }
-        return false;
-    }
-}
 
-// Ensure authenticated
-bool LPKeyCloakClient::ensureAuthenticated()
-{
-    if (m_accessToken.empty())
-    {
-        return authenticate();
-    }
-    return true;
-}
+            std::string tokenUrl = "/realms/" + m_realm + "/protocol/openid-connect/token";
 
-// Get auth headers
-httplib::Headers LPKeyCloakClient::getAuthHeaders() const
-{
-    httplib::Headers headers;
-    if (!m_accessToken.empty())
-    {
-        headers.emplace("Authorization", "Bearer " + m_accessToken);
-    }
-    headers.emplace("Content-Type", "application/json");
-    headers.emplace("Accept", "application/json");
-    return headers;
-}
+            // Prepare form data for password grant
+            httplib::Params params;
+            params.emplace("client_id", m_clientId);
+            params.emplace("grant_type", "password");
+            params.emplace("username", m_username);
+            params.emplace("password", m_password);
 
-// Create user in Keycloak
-bool LPKeyCloakClient::createUser(const UserInfo &userInfo, const std::string &realm)
-{
-    m_lastError.clear();
+            // Make the POST request
+            auto res = m_client->Post(tokenUrl.c_str(), params);
 
-    // Ensure we're authenticated
-    if (!ensureAuthenticated())
-    {
-        m_lastError = "Not authenticated: " + m_lastError;
-        return false;
-    }
-
-    // Validate user info
-    if (userInfo.username.empty())
-    {
-        m_lastError = "Username is required";
-        return false;
-    }
-
-    if (userInfo.email.empty())
-    {
-        m_lastError = "Email is required";
-        return false;
-    }
-
-    // Build the API endpoint
-    std::string userUrl = "/admin/realms/" + realm + "/users";
-
-    // Convert user info to JSON
-    nlohmann::json userJson = userInfo.toJson();
-    std::string jsonBody = userJson.dump();
-
-    // Get authentication headers
-    auto headers = getAuthHeaders();
-
-    // Make the POST request to create user
-    auto res = m_client->Post(userUrl.c_str(), headers, jsonBody, "application/json");
-
-    if (res && res->status == 201)
-    {
-        // Status 201 indicates user was created successfully
-        return true;
-    }
-    else if (res && res->status == 409)
-    {
-        // Status 409 indicates user already exists
-        m_lastError = "User with username '" + userInfo.username + "' already exists";
-        return false;
-    }
-    else
-    {
-        if (res)
-        {
-            m_lastError = "Failed to create user. Status: " + std::to_string(res->status);
-            if (!res->body.empty())
+            if (res && res->status == 200)
             {
                 try
                 {
-                    auto errorJson = nlohmann::json::parse(res->body);
-                    if (errorJson.contains("errorMessage"))
+                    auto json = nlohmann::json::parse(res->body);
+                    if (json.contains("access_token"))
                     {
-                        m_lastError += " - " + errorJson["errorMessage"].get<std::string>();
+                        m_accessToken = json["access_token"].get<std::string>();
+                        return true;
                     }
                     else
+                    {
+                        m_lastError = "Access token not found in response";
+                        return false;
+                    }
+                }
+                catch (const nlohmann::json::exception &e)
+                {
+                    m_lastError = "Failed to parse JSON response: " + std::string(e.what());
+                    return false;
+                }
+            }
+            else
+            {
+                if (res)
+                {
+                    m_lastError = "Authentication failed with status: " + std::to_string(res->status);
+                    if (!res->body.empty())
                     {
                         m_lastError += " - " + res->body;
                     }
                 }
-                catch (...)
+                else
                 {
-                    m_lastError += " - " + res->body;
+                    m_lastError = "Authentication request failed";
                 }
+                return false;
             }
         }
-        else
-        {
-            m_lastError = "Request failed to create user";
-        }
-        return false;
-    }
-}
 
-// Set credentials
-void LPKeyCloakClient::setCredentials(const std::string &username, const std::string &password)
-{
-    m_username = username;
-    m_password = password;
-    // Clear existing token since credentials changed
-    m_accessToken.clear();
-}
+        // Ensure authenticated
+        bool KeycloakClient::ensureAuthenticated()
+        {
+            if (m_accessToken.empty())
+            {
+                return authenticate();
+            }
+            return true;
+        }
+
+        // Get auth headers
+        httplib::Headers KeycloakClient::getAuthHeaders() const
+        {
+            httplib::Headers headers;
+            if (!m_accessToken.empty())
+            {
+                headers.emplace("Authorization", "Bearer " + m_accessToken);
+            }
+            headers.emplace("Content-Type", "application/json");
+            headers.emplace("Accept", "application/json");
+            return headers;
+        }
+
+        // Create user in Keycloak
+        bool KeycloakClient::createUser(const UserInfo &userInfo, const std::string &realm)
+        {
+            m_lastError.clear();
+
+            // Ensure we're authenticated
+            if (!ensureAuthenticated())
+            {
+                m_lastError = "Not authenticated: " + m_lastError;
+                return false;
+            }
+
+            // Validate user info
+            if (userInfo.username.empty())
+            {
+                m_lastError = "Username is required";
+                return false;
+            }
+
+            if (userInfo.email.empty())
+            {
+                m_lastError = "Email is required";
+                return false;
+            }
+
+            // Build the API endpoint
+            std::string userUrl = "/admin/realms/" + realm + "/users";
+
+            // Convert user info to JSON
+            nlohmann::json userJson = userInfo.toJson();
+            std::string jsonBody = userJson.dump();
+
+            // Get authentication headers
+            auto headers = getAuthHeaders();
+
+            // Make the POST request to create user
+            auto res = m_client->Post(userUrl.c_str(), headers, jsonBody, "application/json");
+
+            if (res && res->status == 201)
+            {
+                // Status 201 indicates user was created successfully
+                return true;
+            }
+            else if (res && res->status == 409)
+            {
+                // Status 409 indicates user already exists
+                m_lastError = "User with username '" + userInfo.username + "' already exists";
+                return false;
+            }
+            else
+            {
+                if (res)
+                {
+                    m_lastError = "Failed to create user. Status: " + std::to_string(res->status);
+                    if (!res->body.empty())
+                    {
+                        try
+                        {
+                            auto errorJson = nlohmann::json::parse(res->body);
+                            if (errorJson.contains("errorMessage"))
+                            {
+                                m_lastError += " - " + errorJson["errorMessage"].get<std::string>();
+                            }
+                            else
+                            {
+                                m_lastError += " - " + res->body;
+                            }
+                        }
+                        catch (...)
+                        {
+                            m_lastError += " - " + res->body;
+                        }
+                    }
+                }
+                else
+                {
+                    m_lastError = "Request failed to create user";
+                }
+                return false;
+            }
+        }
+
+        // Set credentials
+        void KeycloakClient::setCredentials(const std::string &username, const std::string &password)
+        {
+            m_username = username;
+            m_password = password;
+            // Clear existing token since credentials changed
+            m_accessToken.clear();
+        }
+
+    } // namespace auth
+} // namespace logipad

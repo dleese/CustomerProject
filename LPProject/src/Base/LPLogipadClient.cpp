@@ -1,13 +1,23 @@
 /**
  * @file LPLogipadClient.cpp
  * @brief Implementation of Logipad client class
+ * @details This file contains the implementation of all LPLogipadClient methods,
+ *          including authentication, user retrieval, and JSON serialization.
+ * @author Dirk Leese
+ * @date 2025
  */
 
 #include <LPLogipadClient.hpp>
 #include <iostream>
 
-// Constructor
-LPLogipadClient::LPLogipadClient(
+namespace logipad {
+namespace client {
+
+/**
+ * @brief Constructor implementation
+ * @details Initializes all connection parameters and creates the SSL client.
+ */
+LogipadClient::LogipadClient(
     const std::string &host,
     int port,
     const std::string &realm,
@@ -19,15 +29,21 @@ LPLogipadClient::LPLogipadClient(
                                    m_clientId(clientId),
                                    m_username(username),
                                    m_password(password),
-                                    m_httplibClient(std::make_unique<httplib::SSLClient>(host, port))
+                                   m_httplibClient(std::make_unique<httplib::SSLClient>(host, port))
 {
 }
 
-// Destructor
-LPLogipadClient::~LPLogipadClient() = default;
+/**
+ * @brief Destructor implementation
+ * @details Automatically cleans up the SSL client and member variables.
+ */
+LogipadClient::~LogipadClient() = default;
 
-// Authenticate method
-bool LPLogipadClient::authenticate()
+/**
+ * @brief Authenticate with Keycloak server
+ * @details Performs password grant authentication and stores the access token.
+ */
+bool LogipadClient::authenticate()
 {
     m_accessToken.clear();
 
@@ -59,8 +75,11 @@ bool LPLogipadClient::authenticate()
     return false;
 }
 
-// User::toJson() implementation
-nlohmann::json LPLogipadClient::User::toJson() const {
+/**
+ * @brief Convert User structure to JSON format
+ * @details Serializes all user fields to JSON, including only optional fields that have values.
+ */
+nlohmann::json LogipadClient::User::toJson() const {
     nlohmann::json json;
     json["guid"] = guid;
     
@@ -87,8 +106,12 @@ nlohmann::json LPLogipadClient::User::toJson() const {
     return json;
 }
 
-// GetAllUsers method
-bool LPLogipadClient::getAllUsers(Users& users, const std::string& apiHost, int apiPort)
+/**
+ * @brief Retrieve all users from the Logipad identity API
+ * @details Makes authenticated GET request, parses JSON response, and populates users vector.
+ *          Handles both direct array responses and nested object responses.
+ */
+bool LogipadClient::getAllUsers(Users& users, const std::string& apiHost, int apiPort)
 {
     // Clear existing users
     users.users.clear();
@@ -239,3 +262,6 @@ bool LPLogipadClient::getAllUsers(Users& users, const std::string& apiHost, int 
 
     return false;
 }
+
+} // namespace client
+} // namespace logipad
